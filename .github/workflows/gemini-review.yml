@@ -26,7 +26,7 @@ jobs:
         uses: google-github-actions/run-gemini-cli@v0
         with:
           gemini_model: "gemini-1.5-flash" # Best balance of speed and free quota
-          google_api_key: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           review_type: "code_quality"
           custom_prompt: |
             You are a Senior Web Developer mentoring a fresher. Review the code for fundamental best practices:

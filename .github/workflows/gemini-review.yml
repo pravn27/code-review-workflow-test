@@ -25,10 +25,10 @@ jobs:
       - name: Gemini PR Review
         uses: google-github-actions/run-gemini-cli@v0
         with:
+          gemini_cli_version: "latest"
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: "gemini-1.5-flash" # Best balance of speed and free quota
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          review_type: "code_quality"
-          custom_prompt: |
+          prompt: |
             You are a Senior Web Developer mentoring a fresher. Review the code for fundamental best practices:
             1. **HTML Semantics:** Ensure use of proper tags (e.g., <button> vs <a>, <main>, <nav>, <section>) and accessible attributes like 'alt' for images.
             2. **CSS Quality:** Check for DRY (Don't Repeat Yourself) principles, proper use of units (rem/em over px), and avoiding ID selectors for styling.

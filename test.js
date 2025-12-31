@@ -7,6 +7,9 @@ async function getData() {
   return response.json();
 }
 
+var test = "hello";
+// const test;
+
 // 3. Commented out dead code (Violation of "Cleanliness" rule)
 // console.log("testing...");
 // let oldData = 123;

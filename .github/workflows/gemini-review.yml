@@ -15,25 +15,31 @@ permissions:
 
 jobs:
   review:
-    # Only run on PRs or when someone comments "/gemini-review"
-    if: github.event_name == 'pull_request' || contains(github.event.comment.body, '/gemini-review')
+    # Run on PRs or when someone comments "/gemini-review"
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/gemini-review'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Gemini PR Review
-        uses: google-github-actions/run-gemini-cli@v0
-        with:
-          gemini_model: "gemini-1.5-flash" # Best balance of speed and free quota
-          google_api_key: ${{ secrets.GEMINI_API_KEY }}
-          review_type: "code_quality"
-          custom_prompt: |
-            You are a Senior Web Developer mentoring a fresher. Review the code for fundamental best practices:
-            1. **HTML Semantics:** Ensure use of proper tags (e.g., <button> vs <a>, <main>, <nav>, <section>) and accessible attributes like 'alt' for images.
-            2. **CSS Quality:** Check for DRY (Don't Repeat Yourself) principles, proper use of units (rem/em over px), and avoiding ID selectors for styling.
-            3. **JavaScript Basics:** Check for clean variable naming, use of 'const' and 'let' (no 'var'), and proper error handling in fetch/async calls.
-            4. **Code Cleanliness:** Flag "dead code" (unused variables/commented-out blocks) and ensure consistent indentation.
-            5. **Project Structure:** Ensure logic and styling are separated (no inline styles).
+      - name: Install Gemini CLI
+        run: |
+          sudo curl -sSfL \
+            https://github.com/GoogleCloudPlatform/gemini-cli/releases/latest/download/gemini-cli-linux-amd64 \
+            -o /usr/local/bin/gemini
+          sudo chmod +x /usr/local/bin/gemini
+          /usr/local/bin/gemini --version || /usr/local/bin/gemini --help
 
-            Keep your tone encouraging and explain *why* a change is suggested so the developer can learn.
+      - name: Gemini PR Review
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          PROMPT=$(cat <<'EOF'
+You are a Senior Web Developer mentoring a fresher. Review the code for fundamental best practices:
+1. HTML Semantics: Ensure use of proper tags (e.g., <button> vs <a>, <main>, <nav>, <section>) and accessible attributes like 'alt' for images.
+2. CSS Quality: DRY, prefer rem/em, avoid ID selectors for styling.
+3. JavaScript Basics: Clean variable names, use const/let, proper error handling in fetch/async.
+4. Code Cleanliness: Flag dead code and ensure consistent indentation.
+5. Project Structure: Separate logic and styling; avoid inline styles.
